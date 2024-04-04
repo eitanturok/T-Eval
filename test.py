@@ -8,6 +8,7 @@ import teval.evaluators as evaluator_factory
 from lagent.llms.huggingface import HFTransformerCasualLM, HFTransformerChat
 from lagent.llms.openai import GPTAPI
 from lagent.llms.vllm_wrapper import VllmModel
+from teval.utils.download_dataset import download_dataset
 from teval.utils.meta_template import meta_template_dict
 from tqdm import tqdm
 
@@ -98,6 +99,12 @@ if __name__ == '__main__':
     os.makedirs(args.out_dir, exist_ok=True)
     tmp_folder_name = os.path.splitext(args.out_name)[0]
     os.makedirs(os.path.join(args.out_dir, tmp_folder_name), exist_ok=True)
+
+    # download dataset if it does not exist
+    cwd = os.getcwd()
+    if not os.path.exists(cwd + args.dataset_path):
+        download_dataset(args.dataset_path)
+
     dataset, tested_num, total_num = load_dataset(args.dataset_path, args.out_dir, args.resume, tmp_folder_name=tmp_folder_name)
     if args.test_num == -1:
         test_num = max(total_num - tested_num, 0)
