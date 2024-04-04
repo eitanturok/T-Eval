@@ -9,6 +9,7 @@ from lagent.llms.huggingface import HFTransformerCasualLM, HFTransformerChat
 from lagent.llms.openai import GPTAPI
 from lagent.llms.vllm_wrapper import VllmModel
 from teval.utils.download_dataset import download_dataset
+from teval.utils.saving import upload_generations
 from teval.utils.meta_template import meta_template_dict
 from tqdm import tqdm
 
@@ -23,6 +24,7 @@ def parse_args():
     parser.add_argument('--resume', action='store_true')
     parser.add_argument('--out_name', type=str, default='tmp.json')
     parser.add_argument('--out_dir', type=str, default="work_dirs/")
+    parser.add_argument("--upload_path", type=str, default="")
     # [api model name: 'gpt-3.5-turbo-16k', 'gpt-4-1106-preview', 'claude-2.1', 'chat-bison-001']
     parser.add_argument('--model_path', type=str, help="path to huggingface model / api model name")
     parser.add_argument('--eval', type=str, choices=['instruct', 'reason', 'plan', 'retrieve', 'review', 'understand', 'rru'])
@@ -161,6 +163,10 @@ if __name__ == '__main__':
             results = dict()
         eval_results = evaluator.evaluate()
         print(eval_results)
+
         results[args.eval + '_' + args.prompt_type] = eval_results
         print(f"Writing Evaluation Results to {json_path}")
         mmengine.dump(results, json_path)
+
+        if args.upload_path:
+            pass
