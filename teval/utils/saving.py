@@ -31,6 +31,7 @@ def upload_results(in_dir, out_dir):
 
     for filepath, filename in zip(filepaths, filenames):
         df = pd.read_json(filepath).T
+        df["index"] = df.index
         to_cloud(df, filename, out_dir)
 
 def download_results(in_dir, out_dir):
@@ -38,9 +39,15 @@ def download_results(in_dir, out_dir):
 
     _, _, path = parse_uri(in_dir)
     object_store = maybe_create_object_store_from_uri(in_dir)
+    dfs = []
+
     if object_store is not None:
         object_names = object_store.list_objects(path)
         for object_name in object_names:
             filename = object_name.split("/")[-1]
             out_path = os.path.join(out_dir, filename)
-            object_store.download_object(object_name, out_path)
+            object_store.download_object(object_name, out_path, overwrite=True)
+
+            df = pd.read_json(out_path, orient="records", lines=True)
+            dfs.append(df)
+    return dfs
